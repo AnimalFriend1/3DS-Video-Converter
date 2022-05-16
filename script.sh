@@ -24,8 +24,8 @@ echo 16:9
 echo 5:3
 read ASPECT_OPTION
 echo Select 3DS type. Available options:
-new
-old
+echo new
+echo old
 read DS_TYPE
 if [ $DS_TYPE = old ]; then
     $QUALITY=15
@@ -42,7 +42,7 @@ if [ $SOURCE_OPTION = yt ]; then
     chmod a+rx yt-dlp
     fi
     echo Downloading video
-    ./yt-dlp --cookies cookies.txt -o "%(id)s.%(ext)s" $YTURL
+    ./yt-dlp -o "%(id)s.%(ext)s" $YTURL
     FILENAME=$(./yt-dlp --get-filename -o "%(id)s.%(ext)s" $YTURL)
     OTHERFILENAME=$(./yt-dlp --get-filename -o "%(title)s.mp4" $YTURL)
 fi
