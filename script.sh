@@ -57,6 +57,11 @@ if [ $ASPECT_OPTION = 5:3 ]; then
 fi
 echo Getting frame rate...
 FRAME_RATE=$(ffmpeg -i $FILENAME 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
+# untested ↓
+if [ FRAME_RATE -gt 30 ]; then
+    echo "Framerate will be 30"
+    FRAME_RATE=30
+fi
 echo Converting...
 ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
 if [ $SOURCE_OPTION = yt ]; then
