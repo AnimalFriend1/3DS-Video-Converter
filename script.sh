@@ -28,9 +28,9 @@ echo new
 echo old
 read DS_TYPE
 if [ $DS_TYPE = old ]; then
-    $QUALITY=15
+    QUALITY=15
 elif [ $DS_TYPE = new ]; then
-    $QUALITY=1
+    QUALITY=1
 else
     echo Invalid option
     exit
@@ -58,7 +58,7 @@ fi
 echo Getting frame rate...
 FRAME_RATE=$(ffmpeg -i $FILENAME 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
 echo Converting...
-ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY $OTHERFILENAME
+ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
 if [ $SOURCE_OPTION = yt ]; then
     rm $FILENAME
 fi
