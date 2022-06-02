@@ -71,4 +71,5 @@ ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE
 if [ $SOURCE_OPTION = yt ]; then
     rm $FILENAME
 fi
-
+echo "Finished, press the enter key to exit"
+read
