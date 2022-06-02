@@ -8,6 +8,10 @@ if [ $SOURCE_OPTION = yt ]; then
 elif [ $SOURCE_OPTION = file ]; then
     echo Enter filename
     read FILENAME
+    if [ ! -f $FILENAME ]; then
+        echo File does not exist
+        exit
+    fi
     echo "Enter output filename (should end in .mp4)"
     read OTHERFILENAME
     if [[ $OTHERFILENAME != *.mp4 ]]; then
