@@ -27,6 +27,16 @@ echo 4:3
 echo 16:9
 echo 5:3
 read ASPECT_OPTION
+if [ $ASPECT_OPTION = 4:3 ]; then
+    ASPECT_RES=320x240
+elif [ $ASPECT_OPTION = 16:9 ]; then
+    ASPECT_RES=426x240
+elif [ $ASPECT_OPTION = 5:3 ]; then
+    ASPECT_RES=400x240
+else
+    echo Invalid option
+    exit
+fi
 echo Select 3DS type. Available options:
 echo new
 echo old
@@ -50,21 +60,14 @@ if [ $SOURCE_OPTION = yt ]; then
     FILENAME=$(./yt-dlp --get-filename -o "%(id)s.%(ext)s" $YTURL)
     OTHERFILENAME=$(./yt-dlp --get-filename -o "%(title)s.mp4" $YTURL)
 fi
-if [ $ASPECT_OPTION = 4:3 ]; then
-    ASPECT_RES=320x240
-fi
-if [ $ASPECT_OPTION = 16:9 ]; then
-    ASPECT_RES=426x240
-fi
-if [ $ASPECT_OPTION = 5:3 ]; then
-    ASPECT_RES=400x240
-fi
 echo Getting frame rate...
 FRAME_RATE=$(ffmpeg -i $FILENAME 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
 # untested ↓
-if [ FRAME_RATE -gt 30 ]; then
-    echo "Framerate will be 30"
-    FRAME_RATE=30
+if [ $DS_TYPE = old ]; then
+    if [ FRAME_RATE -gt 30 ]; then
+        echo "Framerate will be 30"
+        FRAME_RATE=30
+    fi
 fi
 echo Converting...
 ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
