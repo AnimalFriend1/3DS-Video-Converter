@@ -56,7 +56,11 @@ if [ $SOURCE_OPTION = yt ]; then
     chmod a+rx yt-dlp
     fi
     echo Downloading video
-    ./yt-dlp -o "%(id)s.%(ext)s" $YTURL -f 'bestvideo[height<=240]+bestaudio/best[height<=240]'
+    if [ $DS_TYPE = old ]; then
+        ./yt-dlp -o "%(id)s.%(ext)s" $YTURL -f 'bestvideo[height<=240]+bestaudio/best[height<=240]'
+    else
+        ./yt-dlp -o "%(id)s.%(ext)s" $YTURL
+    fi
     FILENAME=$(./yt-dlp --get-filename -o "%(id)s.%(ext)s" $YTURL)
     OTHERFILENAME=$(./yt-dlp --get-filename -o "%(title)s.mp4" $YTURL)
 fi
