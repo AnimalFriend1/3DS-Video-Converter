@@ -66,7 +66,6 @@ if [ $SOURCE_OPTION = yt ]; then
 fi
 echo Getting frame rate...
 FRAME_RATE=$(ffmpeg -i $FILENAME 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
-# untested ↓
 if [ $DS_TYPE = old ]; then
     if [ FRAME_RATE -gt 30 ]; then
         echo "Framerate will be 30"
