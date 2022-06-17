@@ -1,3 +1,19 @@
+if ! command -v ffmpeg &> /dev/null
+then
+    echo "FFmpeg isn't installed"
+    if command -v apt-get &> /dev/null
+    then
+        echo Install it now?
+        select yn in "Yes" "No"; do
+            case $yn in
+                Yes ) sudo apt-get install ffmpeg; break;;
+                No ) exit;;
+            esac
+        done
+    else
+        exit
+    fi
+fi
 echo Select source.
 select SOURCE_OPTION in "Youtube" "File"; do
     case $SOURCE_OPTION in
