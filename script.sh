@@ -15,9 +15,9 @@ then
     fi
 fi
 echo Select source.
-select SOURCE_OPTION in "Youtube" "File"; do
+select SOURCE_OPTION in "YouTube" "File"; do
     case $SOURCE_OPTION in
-    Youtube ) 
+    YouTube ) 
     echo Enter video URL
     read YTURL
     break;;
@@ -62,7 +62,7 @@ select DS_TYPE in "new" "old"; do
     break;;
     esac
 done
-if [ $SOURCE_OPTION = yt ]; then
+if [ $SOURCE_OPTION = YouTube ]; then
     if [ ! -f yt-dlp ]; then
     echo Downloading yt-dlp
     wget -q https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
@@ -86,8 +86,8 @@ if [ $DS_TYPE = old ]; then
     fi
 fi
 echo Converting...
-ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
-if [ $SOURCE_OPTION = yt ]; then
+ffmpeg -i "$FILENAME" -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
+if [ $SOURCE_OPTION = YouTube ]; then
     rm $FILENAME
 fi
 if [[ $(ls -l /media/$USER/ | grep -c ^d) = 1 ]]; then
