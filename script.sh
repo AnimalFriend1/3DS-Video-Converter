@@ -77,5 +77,14 @@ ffmpeg -i $FILENAME -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE
 if [ $SOURCE_OPTION = yt ]; then
     rm $FILENAME
 fi
+if [[ $(ls -l /media/$USER/ | grep -c ^d) = 1 ]]; then
+    echo Save to storage device at /media/$USER/$(ls /media/$USER/)?
+    select yn in "Yes" "No"; do
+        case $yn in
+            Yes ) mv "$OTHERFILENAME" "/media/cato/$(ls /media/$USER/)"; break;;
+            No ) echo File saved in "$PWD"; break;;
+        esac
+    done
+fi
 echo "Finished, press the enter key to exit"
 read
