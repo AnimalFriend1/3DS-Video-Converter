@@ -1,54 +1,51 @@
-echo Select source. Available options:
-echo "yt (Youtube)"
-echo "file"
-read SOURCE_OPTION
-if [ $SOURCE_OPTION = yt ]; then
+echo Select source.
+select SOURCE_OPTION in "Youtube" "File"; do
+    case $SOURCE_OPTION in
+    Youtube ) 
     echo Enter video URL
     read YTURL
-elif [ $SOURCE_OPTION = file ]; then
+    break;;
+    File ) 
     echo Enter filename
     read FILENAME
     if [ ! -f $FILENAME ]; then
         echo File does not exist
         exit
     fi
-    echo "Enter output filename (should end in .mp4)"
-    read OTHERFILENAME
-    if [[ $OTHERFILENAME != *.mp4 ]]; then
-        OTHERFILENAME="$OTHERFILENAME.mp4"
-        echo Output filename will be $OTHERFILENAME
-    fi
-else
-    echo Invalid option
-    exit
-fi
-echo Select an aspect ratio. Available options:
-echo 4:3
-echo 16:9
-echo 5:3
-read ASPECT_OPTION
-if [ $ASPECT_OPTION = 4:3 ]; then
+        echo "Enter output filename (should end in .mp4)"
+        read OTHERFILENAME
+        if [[ $OTHERFILENAME != *.mp4 ]]; then
+            OTHERFILENAME="$OTHERFILENAME.mp4"
+            echo Output filename will be $OTHERFILENAME
+        fi
+        break;;
+    esac
+done
+echo Select an aspect ratio.
+select ASPECT_OPTION in "4:3" "16:9" "5:3"; do
+    case $ASPECT_OPTION in
+    4:3 )
     ASPECT_RES=320x240
-elif [ $ASPECT_OPTION = 16:9 ]; then
+    break;;
+    16:9 )
     ASPECT_RES=426x240
-elif [ $ASPECT_OPTION = 5:3 ]; then
+    break;;
+    5:3 )
     ASPECT_RES=400x240
-else
-    echo Invalid option
-    exit
-fi
-echo Select 3DS type. Available options:
-echo new
-echo old
-read DS_TYPE
-if [ $DS_TYPE = old ]; then
+    break;;
+    esac
+done
+echo Select 3DS type.
+select DS_TYPE in "new" "old"; do
+    case $DS_TYPE in
+    old )
     QUALITY=15
-elif [ $DS_TYPE = new ]; then
+    break;;
+    new )
     QUALITY=1
-else
-    echo Invalid option
-    exit
-fi
+    break;;
+    esac
+done
 if [ $SOURCE_OPTION = yt ]; then
     if [ ! -f yt-dlp ]; then
     echo Downloading yt-dlp
