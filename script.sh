@@ -1,12 +1,12 @@
-if ! command -v ffmpeg &> /dev/null
+if ! command -v zenity &> /dev/null
 then
-    echo "FFmpeg isn't installed"
+    echo "Zenity isn't installed"
     if command -v apt-get &> /dev/null
     then
         echo Install it now?
         select yn in "Yes" "No"; do
             case $yn in
-                Yes ) sudo apt-get install ffmpeg; break;;
+                Yes ) sudo apt-get install zenity; break;;
                 No ) exit;;
             esac
         done
@@ -14,73 +14,95 @@ then
         exit
     fi
 fi
-echo Select source.
-select SOURCE_OPTION in "YouTube" "File"; do
-    case $SOURCE_OPTION in
-    YouTube ) 
-    echo Enter video URL
-    read YTURL
-    break;;
-    File ) 
-    echo Enter filename
-    read FILENAME
-    if [ ! -f $FILENAME ]; then
-        echo File does not exist
+if ! command -v ffmpeg &> /dev/null
+then
+    zenity --error --text="FFmpeg isn't installed"
+    if command -v apt-get &> /dev/null
+    then
+        if zenity --question --text="Install FFmpeg now?"
+        then
+        sudo apt-get install ffmpeg;
+        else
+        exit
+        fi
+    else
         exit
     fi
-        echo "Enter output filename (should end in .mp4)"
-        read OTHERFILENAME
-        if [[ $OTHERFILENAME != *.mp4 ]]; then
-            OTHERFILENAME="$OTHERFILENAME.mp4"
-            echo Output filename will be $OTHERFILENAME
-        fi
-        break;;
-    esac
-done
-echo Select an aspect ratio.
-select ASPECT_OPTION in "4:3" "16:9" "5:3"; do
-    case $ASPECT_OPTION in
-    4:3 )
-    ASPECT_RES=320x240
-    break;;
-    16:9 )
-    ASPECT_RES=426x240
-    break;;
-    5:3 )
-    ASPECT_RES=400x240
-    break;;
-    esac
-done
-echo Select 3DS type.
-select DS_TYPE in "new" "old"; do
-    case $DS_TYPE in
-    old )
-    QUALITY=15
-    break;;
-    new )
-    QUALITY=1
-    break;;
-    esac
-done
+fi
+SOURCE_OPTION=$(zenity --list --title="Select source" --text="Select source" --column="source" --hide-header YouTube \File)
+if [ -z "$SOURCE_OPTION" ]; then
+exit
+fi
+case $SOURCE_OPTION in
+YouTube ) 
+YTURL=$(zenity --entry --title="YouTube URL" --text="Enter the URL of the YouTube video")
+OTHERFILENAME=$(zenity --file-selection --save --title="Save the file as..." --file-filter="*.mp4")
+if [[ $OTHERFILENAME != *.mp4 ]]; then
+    OTHERFILENAME="$OTHERFILENAME.mp4"
+fi
+if [ -z "$OTHERFILENAME" ]; then
+exit
+fi
+;;
+File ) 
+FILENAME=$(zenity --file-selection --title="Select a video file")
+if [ -z "$FILENAME" ]; then
+exit
+fi
+OTHERFILENAME=$(zenity --file-selection --save --title="Save the file as..." --file-filter="*.mp4")
+if [ -z "$OTHERFILENAME" ]; then
+exit
+fi
+if [[ $OTHERFILENAME != *.mp4 ]]; then
+    OTHERFILENAME="$OTHERFILENAME.mp4"
+fi
+;;
+esac
+ASPECT_OPTION=$(zenity --list --title="Select aspect ratio" --text="Select aspect ratio" --column="Aspect Ratio" --column="Resolution" 16:9 426x240 \4:3 320x240 \5:3 400x240)
+if [ -z "$ASPECT_OPTION" ]; then
+exit
+fi
+case $ASPECT_OPTION in
+4:3 )
+ASPECT_RES=320x240
+;;
+16:9 )
+ASPECT_RES=426x240
+;;
+5:3 )
+ASPECT_RES=400x240
+;;
+esac
+DS_TYPE=$(zenity --list --title="Select 3DS type" --text="Select 3DS type" --column="type" --hide-header New \Old)
+if [ -z "$DS_TYPE" ]; then
+exit
+fi
+case $DS_TYPE in
+Old )
+QUALITY=15
+;;
+New )
+QUALITY=1
+;;
+esac
 if [ $SOURCE_OPTION = YouTube ]; then
     if [ ! -f yt-dlp ]; then
     echo Downloading yt-dlp
-    wget -q https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+    wget --progress=bar:force https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp 2>&1 | zenity --title="Downloading yt-dlp" --text="Downloading yt-dlp" --progress --auto-close --auto-kill
     chmod a+rx yt-dlp
     fi
     echo Downloading video
     if [ $DS_TYPE = old ]; then
-        ./yt-dlp -o "%(id)s.%(ext)s" $YTURL -f 'bestvideo[height<=240]+bestaudio/best[height<=240]'
+        ./yt-dlp -o "%(id)s.%(ext)s" $YTURL --progress --newline -f 'bestvideo[height<=240]+bestaudio/best[height<=240]'
     else
         ./yt-dlp -o "%(id)s.%(ext)s" $YTURL
     fi
     FILENAME=$(./yt-dlp --get-filename -o "%(id)s.%(ext)s" $YTURL)
-    OTHERFILENAME=$(./yt-dlp --get-filename -o "%(title)s.mp4" $YTURL)
 fi
 echo Getting frame rate...
-FRAME_RATE=$(ffmpeg -i $FILENAME 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
-if [ $DS_TYPE = old ]; then
-    if [ FRAME_RATE -gt 30 ]; then
+FRAME_RATE=$(ffmpeg -i "$FILENAME" 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p")
+if [ $DS_TYPE = Old ]; then
+    if [[ FRAME_RATE > 30 ]]; then
         echo "Framerate will be 30"
         FRAME_RATE=30
     fi
@@ -88,16 +110,9 @@ fi
 echo Converting...
 ffmpeg -i "$FILENAME" -acodec aac -vcodec mpeg1video -s $ASPECT_RES -r $FRAME_RATE -q:v $QUALITY "$OTHERFILENAME"
 if [ $SOURCE_OPTION = YouTube ]; then
-    rm $FILENAME
+    rm "$FILENAME"
 fi
-if [[ $(ls -l /media/$USER/ | grep -c ^d) = 1 ]]; then
-    echo Save to storage device at /media/$USER/$(ls /media/$USER/)?
-    select yn in "Yes" "No"; do
-        case $yn in
-            Yes ) mv "$OTHERFILENAME" "/media/cato/$(ls /media/$USER/)"; break;;
-            No ) echo File saved in "$PWD"; break;;
-        esac
-    done
-fi
-echo "Finished, press the enter key to exit"
-read
+if command -v notify-send &> /dev/null
+then
+        notify-send "Finished converting video"
+fi 
