@@ -1,29 +1,32 @@
+#!/bin/bash
 if ! command -v zenity &> /dev/null
 then
     echo "Zenity isn't installed"
-    if command -v apt-get &> /dev/null
-    then
-        echo Install it now?
-        select yn in "Yes" "No"; do
-            case $yn in
-                Yes ) sudo apt-get install zenity; break;;
-                No ) exit;;
-            esac
-        done
-    else
-        exit
-    fi
+    echo Install it now?
+    select yn in "Yes" "No"; do
+        case $yn in
+            Yes )
+            if [ -x "$(command -v apk)" ];       then sudo apk add --no-cache zenity
+            elif [ -x "$(command -v apt-get)" ]; then sudo apt-get install zenity
+            elif [ -x "$(command -v dnf)" ];     then sudo dnf install zenity
+            elif [ -x "$(command -v zypper)" ];  then sudo zypper install zenity
+            else echo "Package manager not found. You must manually install zenity."; exit
+            fi
+            break;;
+            No ) exit;;
+        esac
+    done
 fi
 if ! command -v ffmpeg &> /dev/null
 then
     zenity --error --text="FFmpeg isn't installed"
-    if command -v apt-get &> /dev/null
+    if zenity --question --text="Install FFmpeg now?"
     then
-        if zenity --question --text="Install FFmpeg now?"
-        then
-        sudo apt-get install ffmpeg;
-        else
-        exit
+        if [ -x "$(command -v apk)" ];       then sudo apk add --no-cache ffmpeg
+        elif [ -x "$(command -v apt-get)" ]; then sudo apt-get install ffmpeg
+        elif [ -x "$(command -v dnf)" ];     then sudo dnf install zenity
+        elif [ -x "$(command -v zypper)" ];  then sudo zypper install zenity
+        else zenity --error --text="Package manager not found. You must manually install FFmpeg."; exit
         fi
     else
         exit
@@ -73,6 +76,7 @@ ASPECT_RES=426x240
 ASPECT_RES=400x240
 ;;
 esac
+echo Select 3DS type.
 DS_TYPE=$(zenity --list --title="Select 3DS type" --text="Select 3DS type" --column="type" --hide-header New \Old)
 if [ -z "$DS_TYPE" ]; then
 exit
