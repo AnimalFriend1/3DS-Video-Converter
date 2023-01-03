@@ -10,6 +10,7 @@ then
             elif [ -x "$(command -v apt-get)" ]; then sudo apt-get install zenity
             elif [ -x "$(command -v dnf)" ];     then sudo dnf install zenity
             elif [ -x "$(command -v zypper)" ];  then sudo zypper install zenity
+            elif [ -x "$(command -v pacman)" ];  then sudo pacman -S zenity
             else echo "Package manager not found. You must manually install zenity."; exit
             fi
             break;;
@@ -24,8 +25,9 @@ then
     then
         if [ -x "$(command -v apk)" ];       then sudo apk add --no-cache ffmpeg
         elif [ -x "$(command -v apt-get)" ]; then sudo apt-get install ffmpeg
-        elif [ -x "$(command -v dnf)" ];     then sudo dnf install zenity
-        elif [ -x "$(command -v zypper)" ];  then sudo zypper install zenity
+        elif [ -x "$(command -v dnf)" ];     then sudo dnf install ffmpeg
+        elif [ -x "$(command -v zypper)" ];  then sudo zypper install ffmpeg
+        elif [ -x "$(command -v pacman)" ];  then sudo pacman -S ffmpeg
         else zenity --error --text="Package manager not found. You must manually install FFmpeg."; exit
         fi
     else
